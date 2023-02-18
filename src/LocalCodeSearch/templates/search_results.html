@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Search Results</title>
+</head>
+<body>
+    <h1>Search Results</h1>
+    {% if results %}
+    <ul>
+        {% for result in results %}
+        <li><a href="{{ url_for('result_details', id=result['_id']) }}">{{ result.file_name }}</a></li>
+        <ul>
+            {% for comment in result.comments %}
+            <li>{{ comment }}</li>
+            {% endfor %}
+        </ul>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p>No results found.</p>
+    {% endif %}
+</body>
+</html>

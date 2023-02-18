@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Code Files</title>
+</head>
+<body>
+    <h1>Code Files</h1>
+
+    <form action="{{ url_for('search') }}" method="GET">
+        <input type="text" name="query">
+        <input type="submit" value="Search">
+      </form>
+
+
+    <h1>Search Results</h1>
+        {% if search_results %}
+        {% include 'search_results.html' %}
+        {% endif %}
+    <h1>Code Files</h1>
+    
+    <ul> 
+    {% for code_file in code_files %}
+        <li>{{ code_file.file_name }} - {{ code_file.file_path }}</li>
+    {% endfor %}
+    </ul>
+</body>
+</html>

@@ -1,4 +1,7 @@
 ast_comments
 pymongo
 nbconvert
+flask
+flask_pymongo
+requests
 # install mongod on linux https://www.mongodb.com/try/download/community-kubernetes-operator

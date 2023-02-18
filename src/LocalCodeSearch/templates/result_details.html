@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Result Details</title>
+</head>
+<body>
+    <h1>Result Details</h1>
+    <ul>
+        <li>Field 1: {{ result.project_id }}</li>
+        <li>Field 2: {{ result.module }}</li>
+        <li>Field 3: {{ result.file_path }}</li>
+        <li>Field 3: {{ result.file_name }}</li>
+        <li>Field 3: {{ result.checksum }}</li>
+        <li>Field 3: {{ result.modify_date }}</li>
+        {% if 'function_ids' in result %}
+        <li>Field 3: {{ result.function_ids }}</li>
+        {% endif %}
+        {% if 'class_ids' in result %}
+        <li>Field 3: {{ result.class_ids }}</li>
+        {% endif %}
+        {% if 'content' in result %}
+        <li>Field 3: {{ result.content }}</li>
+        {% endif %}
+       
+    </ul>
+</body>
+</html>
