@@ -1,0 +1,4 @@
+ast_comments
+pymongo
+nbconvert
+# install mongod on linux https://www.mongodb.com/try/download/community-kubernetes-operator
