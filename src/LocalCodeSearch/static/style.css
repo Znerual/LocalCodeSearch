@@ -1,0 +1,61 @@
+/* Set the font family and size for the entire document */
+body {
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+}
+
+/* Center the form on the page */
+form {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    margin: 50px auto;
+    max-width: 400px;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+/* Style the input fields */
+input[type="text"], textarea {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+/* Style the submit button */
+input[type="submit"] {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+/* Style the text on the page */
+p {
+    margin: 20px auto;
+    max-width: 600px;
+    line-height: 1.5;
+}
+
+label,
+input {
+  display: inline-block;
+  margin-bottom: 1rem;
+}
+
+label {
+  width: 20%;
+}
+
+input {
+  width: 75%;
+  margin-right: 1rem;
+}
