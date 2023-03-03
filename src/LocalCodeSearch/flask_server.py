@@ -16,105 +16,28 @@ def index():
 @app.route('/search')
 def search():
     
-    # Get the form inputs
-    form_inputs = {'file_name' : request.args.get('file_name'),
-                   "functions" : request.args.get('functions'),
-                   "classes" : request.args.get('classes'),
-                   "docstring" : request.args.get('docstring'),
-                   "comments" : request.args.get('comments'),
-                   "content" : request.args.get('content')}
-    
-    print(form_inputs)
     query = {}
+    packages_input = request.args.get('packages', None)
+    if packages_input:
+        query["$or"] = [{"imports": {'$regex': packages_input, '$options': 'i'}},
+                        {"imports_aliases": {'$regex': packages_input, '$options': 'i'}}]
+        
+    content_input = request.args.get('content', None)
+    if content_input:
+        query["$and"] = [{"$or" : [{"code": {'$regex': content_input, '$options': 'i'}},
+                                   {"docstring": {'$regex': content_input, '$options': 'i'}},
+                                   {"comments": {'$elemMatch' : {'$regex': content_input, '$options': 'i'}}},
+                                   {"summary": {'$regex': content_input, '$options': 'i'}}]}]
     
-    for i in range(1, 7):
-        option_name = f'option{i}'
-        
-        input_value = list(form_inputs.values())[i-1]
-        option = request.args.get(option_name, 'Or')
-       
-        if input_value:
-            input_value = input_value.strip()
-            if option == 'Or':
-                if "$or" in query:
-                    query["$or"].append({list(form_inputs.keys())[i-1]: {'$regex': input_value, '$options': 'i'}})
-                else:
-                    query["$or"] = [{list(form_inputs.keys())[i-1]: {'$regex': input_value, '$options': 'i'}}]
-               
-            else:
-                query[list(form_inputs.keys())[i-1]] = {'$regex': input_value, '$options': 'i'}
-        
-
-    print(query)
    
     
-    results = mongo.db.code_files.aggregate([
-        {
-            "$lookup": {
-                "from": "code_functions",
-                "localField": "function_ids",
-                "foreignField": "_id",
-                "as" : "functions_info"
-            }
-        },
-        {
-            '$lookup': {
-                'from': 'code_classes',
-                'localField': 'class_ids',
-                'foreignField': '_id',
-                'as': 'classes'
-            }
-        },
-        {
-            "$addFields": {
-                "functions_info": {
-                    "$map": {
-                        "input": "$functions_info",
-                        "as": "function",
-                        "in": "$$function.name"
-                    }
-                },
-                "functions_comments" : {
-                    "$map": {
-                        "input": "$functions_info",
-                        "as": "comments",
-                        "in": "$$comments.comments"
-                    }
-                },
-                "classes": {
-                    "$map": {
-                    "input": "$classes",
-                    "as": "class",
-                    "in": "$$class.name"
-                    }
-                }
-            }
-        },
-        {
-            "$project": {
-                "_id": 1,
-                "file_name": 1,
-                "path": 1,
-                "functions": 1,
-                "classes": 1,
-                "docstring": 1,
-                "comments": 1,
-                "content": 1
-            }
-        },
-        {
-            "$match": query
-        }
-        
-    ]
-    )
-    print(results)
+    
     #results = list(collection.find(query))
     #return {'results': results}
 
     
     #print(query)
-    #results = mongo.db.code_files.find({'file_name': {'$regex': query}})
+    results = mongo.db.code_functions.find(query)
     return render_template('results.html', results=results)
 
 @app.route('/help')
@@ -123,9 +46,15 @@ def help():
 
 @app.route('/result_details')
 def result_details():
-    result_id = request.args.get('id')
-    result = mongo.db.code_files.find_one({'_id': ObjectId(result_id)})
-    return render_template('result_details.html', result=result)
+    code_file_id = request.args.get('id')
+    print("In results details got code file id = ", code_file_id)
+    code_file_entry = mongo.db.code_files.find_one({'_id': ObjectId(code_file_id)})
+    project = mongo.db.projects.find_one({'_id': ObjectId(code_file_entry['project_id'])})
+    functions = tuple([f for f in mongo.db.code_functions.find({'_id': {"$in" : code_file_entry["function_ids"]}})])
+    print(len(functions))
+    classes = mongo.db.code_classes.find({'_id': {"$in" : code_file_entry["class_ids"]}})
+    class_functions = tuple([(cl, [f for f in mongo.db.code_functions.find({'_id': {"$in" : cl["function_ids"]}})]) for cl in classes])
+    return render_template('result_details.html', code_file=code_file_entry, project=project, functions=functions, class_functions=class_functions)
 
 
 # @app.route('/results')

@@ -7,48 +7,10 @@
 <h1>Advanced Search</h1>
 <p>Search for code files in the database:</p>
 <form action="{{ url_for('search') }}" method="GET">
-    <label for="file_name">File name:</label>
-    <input type="text" name="file_name">
-    <label for="and1">And</label>
-    <input type="radio" name="option1" value="And">
-    <label for="or1">Or</label>
-    <input type="radio" name="option1" value="Or" checked="True"><br>
-
-    <label for="functions">Functions:</label>
-    <input type="text" name="functions">
-    <label for="and2">And</label>
-    <input type="radio" name="option2" value="And">
-    <label for="or2">Or</label>
-    <input type="radio" name="option2" value="Or" checked="True"><br>
-
-    <label for="classes">Classes:</label>
-    <input type="text" name="classes">
-    <label for="and3">And</label>
-    <input type="radio" name="option3" value="And">
-    <label for="or3">Or</label>
-    <input type="radio" name="option3" value="Or" checked="True"><br>
-
-    <label for="docstring">Docstring:</label>
-    <input type="text" name="docstring">
-    <label for="and4">And</label>
-    <input type="radio" name="option4" value="And">
-    <label for="or4">Or</label>
-    <input type="radio" name="option4" value="Or" checked="True"><br>
-
-    <label for="comments">Comments:</label>
-    <input type="text" name="comments">
-    <label for="and5">And</label>
-    <input type="radio" name="option5" value="And">
-    <label for="or5">Or</label>
-    <input type="radio" name="option5" value="Or" checked="True"><br>
-
-    <label for="content">Non-Code content:</label>
-    <input type="text" name="content">
-    <label for="and6">And</label>
-    <input type="radio" name="option6" value="And">
-    <label for="or6">Or</label>
-    <input type="radio" name="option6" value="Or" checked="True"><br>
-
+    <label for="packages">Packages:</label>
+    <input type="text" name="packages">
+    <label for="content">Content:</label>
+    <input type="text" name="content"><br>
     <button type="submit">Search</button>
 </form>
 {% endblock %}

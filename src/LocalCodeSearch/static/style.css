@@ -59,3 +59,7 @@ input {
   width: 75%;
   margin-right: 1rem;
 }
+
+div {
+    white-space: pre-wrap;
+}
