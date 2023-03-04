@@ -2,8 +2,13 @@ from flask import Flask, render_template, request
 from flask_pymongo import PyMongo
 from bson.objectid import ObjectId
 
+import os
+
 app = Flask(__name__, static_url_path='/static', static_folder='./static')
-app.config["MONGO_URI"] = "mongodb://localhost:27017/CodeIndex"
+
+#"mongodb://localhost:27017/CodeIndex"
+app.config["MONGO_URI"] = os.environ["MONGO_URL"]
+print("MONGO_URL = ", os.environ["MONGO_URL"])
 mongo = PyMongo(app)
 
 @app.route("/")
@@ -69,4 +74,4 @@ def result_details():
 #     mongo.cx.close()
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, host="0.0.0.0", port=os.environ.get("PORT", 3000))
