@@ -4,6 +4,8 @@ ADD LocalCodeSearch /app/LocalCodeSearch
 
 RUN pip install -r /app/LocalCodeSearch/requirements.txt --no-cache-dir
 
+ENV PATH /usr/local/bin:$PATH
+
 EXPOSE 3000
 
 WORKDIR /app/LocalCodeSearch
