@@ -7,4 +7,5 @@ flask_pymongo
 requests
 gunicorn
 Werkzeug
+nbformat
 # install mongod on linux https://www.mongodb.com/try/download/community-kubernetes-operator
