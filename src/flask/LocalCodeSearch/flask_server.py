@@ -3,7 +3,7 @@ from flask import Flask, render_template, request, flash, redirect, url_for, ses
 from werkzeug.utils import secure_filename
 from flask_pymongo import PyMongo
 from bson.objectid import ObjectId
-
+from index import _update_file_check, _update_file
 import os
 
 app = Flask(__name__, static_url_path='/static', static_folder='./static')
@@ -27,7 +27,7 @@ def index():
     collection = mongo.db.code_files
     code_files = collection.find()
     
-    file_contents = {}
+    file_names = {}
     #flash("You're at index")
     # check if post request has the file part
     if request.method == "POST":
@@ -44,19 +44,27 @@ def index():
             return redirect(request.url)
         
         project_name = request.args.get("project", "Unknown")
-        
+        package_name = request.args.get("package", "Unknown")
         if file and file.filename != "":
+            file_content = file.read().decode('utf-8')
             filename = secure_filename(file.filename)
-            file_contents[filename] = file.read().decode('utf-8')
+            update_required, project_id, code_file_id, checksum = _update_file_check(mongo.db, project_name, "Upload", "Upload", filename, file_content)
+            if update_required:
+                _update_file(mongo.db, project_id, code_file_id, checksum, "Upload",filename, package_name, file_content)
+            file_names[filename] = len(file_content)
             
         for lfile in files:
             if lfile and allowed_file(lfile.filename):
                 filename = secure_filename(lfile.filename)
-                file_contents[filename] = lfile.read().decode('utf-8')
+                file_content = lfile.read().decode('utf-8')
+                update_required, project_id, code_file_id, checksum = _update_file_check(mongo.db, project_name, "Upload", "Upload", filename, file_content)
+                if update_required:
+                    _update_file(mongo.db, project_id, code_file_id, checksum, "Upload", filename, package_name, file_content)
+                file_names[filename] = len(file_content)
             #return redirect(url_for(''))
         # TODO: Update databse with projectname, filename and file content
     #print(code_files)
-    return render_template("index.html", code_files=code_files, file_contents=file_contents)
+    return render_template("index.html", code_files=code_files, file_names=file_names)
 
 
 @app.route('/search')
