@@ -159,7 +159,7 @@ def _process_python_code(file_content):
             docstring = ast_comments.get_docstring(node)
             if docstring:
                 start_pos, end_pos = node.body[0].lineno - 1, node.body[0].end_lineno 
-                func_body = lines[node.lineno:start_pos] + lines[end_pos:node.end_lineno]
+                func_body = "\n".join(lines[node.lineno:start_pos] + lines[end_pos:node.end_lineno])
                 functions.append((func_name, func_body, docstring.strip(), visitor.imports, node.lineno, node.end_lineno))
             else:
                 func_body = ast_comments.get_source_segment(filtered_file, node).strip() # get code
@@ -207,7 +207,7 @@ def _process_python_code(file_content):
                     docstring = ast_comments.get_docstring(subnode)
                     if docstring:
                         start_pos, end_pos = subnode.body[0].lineno - 1, subnode.body[0].end_lineno 
-                        func_body = lines[subnode.lineno:start_pos] + lines[end_pos:subnode.end_lineno]
+                        func_body = "\n".join(lines[subnode.lineno:start_pos] + lines[end_pos:subnode.end_lineno])
                         class_functions.append((func_name, func_body, docstring.strip(), visitor.imports, subnode.lineno, subnode.end_lineno))
                     else:
                         func_body = ast_comments.get_source_segment(filtered_file, subnode).strip()
@@ -237,7 +237,7 @@ def _process_python_code(file_content):
     #comments_by_function = [(func_name, comments) for func_name, comments in comments_by_function.items()]
     #comments_by_class = [(class_name, funcs) for class_name, funcs in comments_by_class.items()]
 
-    return module_level_imports, comments, classes, functions_by_class, comments_by_class,  functions, comments_by_function
+    return module_level_imports, comments, classes, functions_by_class, comments_by_class,  functions, comments_by_function, filtered_file
 
 def _process_other_file(file_content):
     # Define regular expressions to match authentication tokens and credentials
