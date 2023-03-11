@@ -163,7 +163,7 @@ def _update_other_file(db, project_id, code_file_id, checksum, file_path, file_n
     update = {"$set": other_files_dict(project_id, package_name, file_path, file_name, checksum, file_content_filtered)}
     code_files.update_one(filter_query, update)
 
-def _update_file(db, project_id, code_file_id, checksum, folder_path, file_name, package_name, included_file_types=["Dockerfile", "*.toml", "*.md", "*.cfg"]):
+def _update_file(db, project_id, code_file_id, checksum, folder_path, file_name, package_name, included_file_types=["Dockerfile", "*.toml", "*.md", "*.cfg", "*.txt", "*.yml", "*.yaml"]):
     if file_name.endswith(".py"):
       
         with open( os.path.join(folder_path, file_name), "r") as f:

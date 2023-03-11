@@ -3,6 +3,8 @@ pymongo
 nbconvert
 flask
 flask_pymongo
+#flask-login
 requests
 gunicorn
+Werkzeug
 # install mongod on linux https://www.mongodb.com/try/download/community-kubernetes-operator

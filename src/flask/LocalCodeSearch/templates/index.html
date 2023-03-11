@@ -13,6 +13,21 @@
     <input type="text" name="content"><br>
     <button type="submit">Search</button>
 </form>
+<h1>Upload New File</h1>
+<form method="post" enctype="multipart/form-data">
+  <label for="project">Project</label>
+  <input type="text" name="project">
+  <label for="files">Upload Folder</label>
+  <input type="file" name="files" multiple="" webkitdirectory="" directory="">
+  <label for="file">Upload File</label>
+  <input type="file" name="file">
+  <input type="submit" value="Upload">
+</form>
+<h1>Uploaded File:</h1>
+{% for filename, file in file_contents.items() %}
+  <h2>{{ filename }}</h2>
+    {{ file }}
+{% endfor %}
 {% endblock %}
 
    

@@ -1,22 +1,63 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, flash, redirect, url_for, session
+#from flask_login import LoginManager
+from werkzeug.utils import secure_filename
 from flask_pymongo import PyMongo
 from bson.objectid import ObjectId
 
 import os
 
 app = Flask(__name__, static_url_path='/static', static_folder='./static')
+app.secret_key = "super secret key"
 
-#"mongodb://localhost:27017/CodeIndex"
-app.config["MONGO_URI"] = os.environ["MONGO_URL"]
-print("MONGO_URL = ", os.environ["MONGO_URL"])
+ALLOWED_EXTENSIONS = {'txt', 'conf', 'yml', 'yaml', 'py', 'ipynb', 'Dockerfile', 'toml', 'md', 'cfg'}
+
+app.config["MONGO_URI"] = os.getenv("MONGO_URL", "mongodb://localhost:27017/CodeIndex")
 mongo = PyMongo(app)
 
-@app.route("/")
+
+
+def allowed_file(filename):
+    for allowed_extension in ALLOWED_EXTENSIONS:
+        if filename.lower().endswith(allowed_extension):
+            return True
+    return False
+
+@app.route("/", methods=['GET', 'POST'])
 def index():
     collection = mongo.db.code_files
     code_files = collection.find()
+    
+    file_contents = {}
+    #flash("You're at index")
+    # check if post request has the file part
+    if request.method == "POST":
+        if "files" not in request.files and "file" not in request.files:
+            print("No file part")
+            return redirect(request.url)
+        files = request.files.getlist('files')
+        file = request.files["file"]
+        print(files)
+        print(file)
+        # if the user did not select a file, we get an empty file without filename
+        if (len(files) == 0 or files[0].filename == "") and file.filename == "":
+            print("No selected file")
+            return redirect(request.url)
+        
+        project_name = request.args.get("project", "Unknown")
+        
+        if file and file.filename != "":
+            filename = secure_filename(file.filename)
+            file_contents[filename] = file.read().decode('utf-8')
+            
+        for lfile in files:
+            if lfile and allowed_file(lfile.filename):
+                filename = secure_filename(lfile.filename)
+                file_contents[filename] = lfile.read().decode('utf-8')
+            #return redirect(url_for(''))
+        # TODO: Update databse with projectname, filename and file content
     #print(code_files)
-    return render_template("index.html", code_files=code_files)
+    return render_template("index.html", code_files=code_files, file_contents=file_contents)
+
 
 @app.route('/search')
 def search():
