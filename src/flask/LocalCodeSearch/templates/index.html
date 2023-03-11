@@ -17,17 +17,21 @@
 <form method="post" enctype="multipart/form-data">
   <label for="project">Project</label>
   <input type="text" name="project">
+  <label for="package">Package</label>
+  <input type="text" name="package">
   <label for="files">Upload Folder</label>
   <input type="file" name="files" multiple="" webkitdirectory="" directory="">
   <label for="file">Upload File</label>
   <input type="file" name="file">
   <input type="submit" value="Upload">
 </form>
-<h1>Uploaded File:</h1>
-{% for filename, file in file_contents.items() %}
-  <h2>{{ filename }}</h2>
-    {{ file }}
-{% endfor %}
+<h1>Uploaded Files:</h1>
+<ul>
+  {% for filename, length in file_names.items() %}
+  <li>{{ filename }} ({{ length }})</li>
+  {% endfor %}  
+</ul>
+
 {% endblock %}
 
    
