@@ -39,16 +39,17 @@ def _get_class_checksum(class_entry:Class_entry):
     text = f"{class_entry.name}{''.join(class_entry.imports)}{''.join([str(id) for id in class_entry.function_ids])}{''.join(class_entry.comments)}{class_entry.code}{class_entry.summary}"
     return _get_text_checksum(text)
 
-def _get_checksum(file_path, file_name):
-    # Read file content
+def _get_checksum_path(file_path, file_name):
     with open(os.path.join(file_path, file_name), "rb") as f:
         file_content = f.read()
+    checksum = hashlib.md5(file_content).hexdigest()
+    return checksum
     
+def _get_checksum(file_content):
     # Calculate checksum
     checksum = hashlib.md5(file_content).hexdigest()
     return checksum
  
-         
 def _update_functions(db, code_file, functions: list[Function_entry]):
     functions_db = db["code_functions"]
 
@@ -109,16 +110,16 @@ def _update_classes(db, code_file, classes: list[Class_entry]):
             
     return class_ids
             
-def _update_python_code_file(db, project_id, code_file_id, checksum, file_path, file_name, package_name, module_level_imports, comments, classes, functions_by_class, comments_by_class,  functions, comments_by_function):
+def _update_python_code_file(db, project_id, code_file_id, checksum, file_path, file_name, package_name, module_level_imports, comments, classes, functions_by_class, comments_by_class,  functions, comments_by_function, file_content):
     # calculate checksum if not provided
     if checksum is None:
-        checksum = _get_checksum(file_path, file_name)
+        checksum = _get_checksum(file_content)
     
     code_files = db["code_files"]
     
     if code_file_id is None:
         logger.debug("Inserting new code file for file {} in package {}".format(file_name, package_name))
-        code_file_id = code_files.insert_one(code_files_dict(project_id, package_name, file_path, file_name, checksum, summary="", class_ids=[], function_ids=[], comments=comments)).inserted_id
+        code_file_id = code_files.insert_one(code_files_dict(project_id, package_name, file_path, file_name, checksum, file_content, summary="", class_ids=[], function_ids=[], comments=comments)).inserted_id
     
     code_file = code_files.find_one({"_id": code_file_id})
     
@@ -145,7 +146,7 @@ def _update_python_code_file(db, project_id, code_file_id, checksum, file_path, 
         logger.debug("Updated {} classes for file {} in package {}".format(len(class_entries), file_name, package_name))
         
     # update database entry
-    new_code_file_dict = code_files_dict(project_id, package_name, file_path, file_name, checksum, summary="", class_ids=new_class_ids, function_ids=new_global_function_ids, comments=comments)
+    new_code_file_dict = code_files_dict(project_id, package_name, file_path, file_name, checksum, file_content, summary="", class_ids=new_class_ids, function_ids=new_global_function_ids, comments=comments)
     del new_code_file_dict["creation_date"]
     code_files.update_one({"_id": code_file_id}, {"$set": new_code_file_dict})
     logger.debug("Updated code file {} to {} in package {}".format(file_name, new_code_file_dict, package_name))
@@ -153,7 +154,7 @@ def _update_python_code_file(db, project_id, code_file_id, checksum, file_path, 
 def _update_other_file(db, project_id, code_file_id, checksum, file_path, file_name, package_name, file_content_filtered):
     # calculate checksum if not provided
     if checksum is None:
-        checksum = _get_checksum(file_path, file_name)
+        checksum = _get_checksum(file_content_filtered)
     
     code_files = db["code_files"]
     
@@ -174,8 +175,8 @@ def _update_file(db, project_id, code_file_id, checksum, folder_path, file_name,
             logger.info("Could not process file: {}".format(os.path.join(folder_path, file_name)))
             return
         
-        module_level_imports, comments, classes, functions_by_class, comments_by_class,  functions, comments_by_function = result
-        _update_python_code_file(db, project_id, code_file_id, checksum, folder_path, file_name, package_name, module_level_imports, comments, classes, functions_by_class, comments_by_class,  functions, comments_by_function)
+        module_level_imports, comments, classes, functions_by_class, comments_by_class,  functions, comments_by_function, filtered_content = result
+        _update_python_code_file(db, project_id, code_file_id, checksum, folder_path, file_name, package_name, module_level_imports, comments, classes, functions_by_class, comments_by_class,  functions, comments_by_function, filtered_content)
     elif file_name.endswith(".ipynb"):
        
         with open(os.path.join(folder_path, file_name)) as f:
@@ -186,8 +187,8 @@ def _update_file(db, project_id, code_file_id, checksum, folder_path, file_name,
             logger.info("Could not process file: {}".format(os.path.join(folder_path, file_name)))
             return
         
-        module_level_imports, comments, classes, functions_by_class, comments_by_class,  functions, comments_by_function = result
-        _update_python_code_file(db, project_id, code_file_id, checksum, folder_path, file_name, package_name, module_level_imports, comments, classes, functions_by_class, comments_by_class,  functions, comments_by_function)
+        module_level_imports, comments, classes, functions_by_class, comments_by_class,  functions, comments_by_function, filtered_content = result
+        _update_python_code_file(db, project_id, code_file_id, checksum, folder_path, file_name, package_name, module_level_imports, comments, classes, functions_by_class, comments_by_class,  functions, comments_by_function, filtered_content)
     for pattern in included_file_types:
         if fnmatch.fnmatch(file_name, pattern):
             with open(os.path.join(folder_path, file_name), "r") as f:
@@ -207,7 +208,7 @@ def _update_file_check(db, project_name, root_dir, file_path, file_name):
         code_file = db["code_files"].find_one({"project_id": project_id, "file_path": file_path, "file_name": file_name})
         if code_file:
             saved_checksum = code_file["checksum"]
-            new_checksum = _get_checksum(file_path, file_name)
+            new_checksum = _get_checksum_path(file_path, file_name)
             if new_checksum == saved_checksum:
                 logger.debug("File {} already in database with checksum {} and did not change".format(file_name, new_checksum))
                 return False, project_id, code_file["_id"], new_checksum
