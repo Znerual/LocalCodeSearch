@@ -158,7 +158,7 @@ def _process_python_code(file_content):
             # get docstring and source code, append to the functions list
             docstring = ast_comments.get_docstring(node)
             if docstring:
-                start_pos, end_pos = node.body[0].lineno - 1, node.body[0].end_lineno 
+                start_pos, end_pos = node.body[0].lineno + 1, node.body[0].end_lineno - 1
                 func_body = "\n".join(lines[node.lineno:start_pos] + lines[end_pos:node.end_lineno])
                 functions.append((func_name, func_body, docstring.strip(), visitor.imports, node.lineno, node.end_lineno))
             else:
@@ -206,7 +206,7 @@ def _process_python_code(file_content):
                     # get docstring and source code, append to the functions list
                     docstring = ast_comments.get_docstring(subnode)
                     if docstring:
-                        start_pos, end_pos = subnode.body[0].lineno - 1, subnode.body[0].end_lineno 
+                        start_pos, end_pos = subnode.body[0].lineno + 1, subnode.body[0].end_lineno - 1
                         func_body = "\n".join(lines[subnode.lineno:start_pos] + lines[end_pos:subnode.end_lineno])
                         class_functions.append((func_name, func_body, docstring.strip(), visitor.imports, subnode.lineno, subnode.end_lineno))
                     else:
