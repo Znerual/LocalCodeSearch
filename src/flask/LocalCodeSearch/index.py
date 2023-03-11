@@ -7,6 +7,7 @@ import pymongo
 import argparse
 import logging
 
+import nbformat
 from nbconvert import PythonExporter
 from nbconvert.preprocessors import RegexRemovePreprocessor
 
@@ -47,7 +48,7 @@ def _get_checksum_path(file_path, file_name):
     
 def _get_checksum(file_content):
     # Calculate checksum
-    checksum = hashlib.md5(file_content).hexdigest()
+    checksum = hashlib.md5(file_content.encode("utf-8")).hexdigest()
     return checksum
  
 def _update_functions(db, code_file, functions: list[Function_entry]):
@@ -163,11 +164,9 @@ def _update_other_file(db, project_id, code_file_id, checksum, file_path, file_n
     update = {"$set": other_files_dict(project_id, package_name, file_path, file_name, checksum, file_content_filtered)}
     code_files.update_one(filter_query, update)
 
-def _update_file(db, project_id, code_file_id, checksum, folder_path, file_name, package_name, included_file_types=["Dockerfile", "*.toml", "*.md", "*.cfg", "*.txt", "*.yml", "*.yaml"]):
+def _update_file(db, project_id, code_file_id, checksum, folder_path, file_name, package_name, file_content, included_file_types=["Dockerfile", "*.toml", "*.md", "*.cfg", "*.txt", "*.yml", "*.yaml"]):
     if file_name.endswith(".py"):
       
-        with open( os.path.join(folder_path, file_name), "r") as f:
-            file_content = f.read()
         logger.debug("Updating file: {}".format(os.path.join(folder_path, file_name)))
         result = _process_python_code(file_content)
         
@@ -178,9 +177,10 @@ def _update_file(db, project_id, code_file_id, checksum, folder_path, file_name,
         module_level_imports, comments, classes, functions_by_class, comments_by_class,  functions, comments_by_function, filtered_content = result
         _update_python_code_file(db, project_id, code_file_id, checksum, folder_path, file_name, package_name, module_level_imports, comments, classes, functions_by_class, comments_by_class,  functions, comments_by_function, filtered_content)
     elif file_name.endswith(".ipynb"):
+        # use nbvonvert exporter to convert notebook (from string) to python code 
+        notebook_node = nbformat.reads(file_content, as_version=4)
+        file_content, resources = exporter.from_notebook_node(notebook_node)
        
-        with open(os.path.join(folder_path, file_name)) as f:
-            file_content, resources = exporter.from_file(f)
         logger.debug("Updating file: {}".format(os.path.join(folder_path, file_name)))
         result = _process_python_code(file_content)
         if result is None:
@@ -191,14 +191,12 @@ def _update_file(db, project_id, code_file_id, checksum, folder_path, file_name,
         _update_python_code_file(db, project_id, code_file_id, checksum, folder_path, file_name, package_name, module_level_imports, comments, classes, functions_by_class, comments_by_class,  functions, comments_by_function, filtered_content)
     for pattern in included_file_types:
         if fnmatch.fnmatch(file_name, pattern):
-            with open(os.path.join(folder_path, file_name), "r") as f:
-                file_content = f.read()
             filtered_content = _process_other_file(file_content)
             _update_other_file(db, project_id, code_file_id, checksum, folder_path, file_name, package_name, filtered_content)
             
     
         
-def _update_file_check(db, project_name, root_dir, file_path, file_name):
+def _update_file_check(db, project_name, root_dir, file_path, file_name, file_content):
     # Check if file is already in the database
     project = db["projects"].find_one({"name": project_name, "root_dir": root_dir})
     
@@ -208,7 +206,7 @@ def _update_file_check(db, project_name, root_dir, file_path, file_name):
         code_file = db["code_files"].find_one({"project_id": project_id, "file_path": file_path, "file_name": file_name})
         if code_file:
             saved_checksum = code_file["checksum"]
-            new_checksum = _get_checksum_path(file_path, file_name)
+            new_checksum = _get_checksum(file_content)
             if new_checksum == saved_checksum:
                 logger.debug("File {} already in database with checksum {} and did not change".format(file_name, new_checksum))
                 return False, project_id, code_file["_id"], new_checksum
@@ -251,9 +249,11 @@ def crawl_files(db, top_package_name, root_dir, package_name=None, exclude_folde
         crawl_files(db, top_package_name, file_path, package_name=package_name)
         logger.debug("Crawling folder: " + file_path + " ...")
         for file_name in os.listdir(file_path):
-            update_required, project_id, code_file_id, checksum = _update_file_check(db, top_package_name, root_dir, file_path, file_name)
+            with open(os.path.join(file_path, file_name), "r") as f:
+                file_content = f.read()
+            update_required, project_id, code_file_id, checksum = _update_file_check(db, top_package_name, root_dir, file_path, file_name, file_content)
             if update_required:
-                _update_file(db, project_id, code_file_id, checksum, file_path, file_name, package_name)
+                _update_file(db, project_id, code_file_id, checksum, file_path, file_name, package_name, file_content)
             
                 
 if __name__ == "__main__":
