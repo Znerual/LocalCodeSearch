@@ -23,7 +23,7 @@ def function_dict(code_file_id, checksum, name, code, imports=[], imports_aliase
     return {"code_file_id":  code_file_id, "checksum" : checksum, "name": name, "code": code, "imports" : imports, "imports_aliases" : imports_aliases, "docstring" : docstring, "comments" : comments,  "summary" : summary, "line_start": line_start, "line_end": line_end}
 
 def code_files_dict(project_id, module, file_path, file_name, checksum, content, summary="", class_ids=[], function_ids=[], comments=[], modify_date=datetime.now(), creation_date=datetime.now(), crawl_date=datetime.now()):
-    return {"project_id": project_id, "checksum" : checksum, "module" : module, "file_path" : file_path, "file_name" : file_name, "summary" : summary, "content" : file_content, "class_ids" : class_ids, "function_ids" : function_ids, "comments" : comments, "modify_date" : modify_date, "creation_date" : creation_date, "crawl_date" : crawl_date}
+    return {"project_id": project_id, "checksum" : checksum, "module" : module, "file_path" : file_path, "file_name" : file_name, "summary" : summary, "content" : content, "class_ids" : class_ids, "function_ids" : function_ids, "comments" : comments, "modify_date" : modify_date, "creation_date" : creation_date, "crawl_date" : crawl_date}
 
 def other_files_dict(project_id, module, file_path, file_name, checksum, content, summary="", modify_date=datetime.now(), creation_date=datetime.now(), crawl_date=datetime.now()):
     return {"project_id": project_id, "module" : module, "file_path" : file_path, "file_name" : file_name, "checksum" : checksum, "summary" : summary, "content" : content, "modify_date" : modify_date, "creation_date" : creation_date, "crawl_date" : crawl_date}
