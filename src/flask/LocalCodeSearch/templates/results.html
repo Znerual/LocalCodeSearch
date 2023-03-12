@@ -5,12 +5,12 @@
 </head>
 <body>
     <h1>Search Results</h1>
-    {% if results %}
+    {% if functions %}
     <ul>
-        {% for result in results %}
-        <li><a href="{{ url_for('result_details', id=result['code_file_id']) }}">{{ result.name }}</a></li>
+        {% for function in functions %}
+        <li><a href="{{ url_for('function_details', function_id=function['_id']) }}">{{ function.name }}</a></li>
         <ul>
-            {% for comment in result.comments %}
+            {% for comment in function.comments %}
             <li>{{ comment }}</li>
             {% endfor %}
         </ul>
