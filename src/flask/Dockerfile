@@ -1,8 +1,10 @@
 FROM python:3.11
 
+ADD LocalCodeSearch/requirements.txt /app/LocalCodeSearch/requirements.txt
+RUN pip install -r /app/LocalCodeSearch/requirements.txt 
+
 ADD LocalCodeSearch /app/LocalCodeSearch
 
-RUN pip install -r /app/LocalCodeSearch/requirements.txt 
 # --no-cache-dir
 
 ENV PATH /usr/local/bin:$PATH
