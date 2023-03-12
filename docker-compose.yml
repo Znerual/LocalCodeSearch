@@ -24,7 +24,7 @@ services:
       - db
     ports:
       - 3000:3000
-    #command: gunicorn -w 1 -b 0.0.0.0:3000 --debug wsgi:app #also change the CMD in the flask docker file
+    command: gunicorn -w 1 -b 0.0.0.0:3000  wsgi:app #also change the CMD in the flask docker file
 
   web:
     image: nginx
