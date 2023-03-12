@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block title %}Code File Details - {{ code_file.file_name }}{% endblock %}
+{% block content %}
+<h1>{{code_file.file_name}} Details</h1>
+<h2> Project {{ project.name}}</h2>
+<ul>
+    <li>Root directory: {{ project.root_dir }}</li>
+    <li>Creation date: {{ project.creation_dir }}</li>
+</ul>
+<h2> Code File - {{ code_file.file_name}}</h2>
+<ul>
+    <li>Module: {{ code_file.module }}</li>
+    <li>File path: {{ code_file.file_path }}</li>
+    <li>File name: {{ code_file.file_name }}</li>
+    <li>Checksum: {{ code_file.checksum }}</li>
+    <li>Modify date: {{ code_file.modify_date }}</li>
+    {% if 'function_ids' in code_file %}
+    <ul>
+        {% for function_id in code_file.function_ids %}
+        <li>Function id: {{ function_id }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
+    {% if 'class_ids' in code_file %}
+    <ul>
+        {% for class_id in code_file.class_ids %}
+        <li>Class id: {{ class_id }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
+    {% if 'content' in code_file %}
+    <div class="code">{{ code_file.content }}</div>
+    {% endif %}
+</ul>
+
+<h2> Functions</h2>
+{% for function in functions %}
+<h1>{{ function.name }} - <a href="{{ url_for('code_file_details', id=code_file['_id']) }}">{{ code_file.name }}</a> </h1>
+code_file.name
+project.name
+<div class="summary">
+    {{ function.summary }}
+</div>
+<ul>
+    <li>Docstring: {{ function.docstring }}</li>
+    {% if function.imports %}
+        {% for import in function.imports %}
+        <ul>
+            <li>Imports: {{ function.imports }}</li>
+        </ul>
+        {% endfor %}
+    {% endif %}
+    <li>Line Start: {{ function.line_start }}</li>
+    <li>Line End: {{ function.line_end }}</li>
+    {% if function.comments %}
+        {% for comment in function.comments %}
+        <ul>
+            <li>Comment: {{ comment }}</li>
+        </ul>
+        {% endfor %}
+    {% endif %}
+</ul>
+{% endfor %}
+<div class="code"><pre><code>{{ function.code }}</code></pre></div>
+<h2> Classes</h2>
+<ul>
+    {% for class, c_functions in class_functions %}
+    <li>Field 4: {{ class.name }}</li>
+    <li>Field 4: {{ class.summary }}</li>
+    <li>Field 8: {{ class.imports }}</li>
+    <li>Field 5: {{ class.line_start }}</li>
+    <li>Field 6: {{ class.line_end }}</li>
+    <li>Field 8: {{ class.code }}</li>
+    <li>Field 8: {{ class.comments }}</li>
+    {% for function in c_functions %}
+    <ul>
+        <li>Field 4: {{ function.name }}</li>
+        <li>Field 4: {{ function.summary }}</li>
+        <li>Field 8: {{ function.docstring }}</li>
+        <li>Field 8: {{ function.imports }}</li>
+        <li>Field 5: {{ function.line_start }}</li>
+        <li>Field 6: {{ function.line_end }}</li>
+        <li><pre><code>Field 8: {{ function.code }}</code></pre></li>
+        <li>Field 8: {{ function.comments }}</li>
+    </ul>
+    {% endfor %}
+    {% endfor %}
+</ul>
+{% endblock %}
