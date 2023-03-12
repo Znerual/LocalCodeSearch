@@ -48,7 +48,7 @@ project.name
     {% if function.imports %}
         {% for import in function.imports %}
         <ul>
-            <li>Imports: {{ function.imports }}</li>
+            <li>Imports: {{ import }}</li>
         </ul>
         {% endfor %}
     {% endif %}
@@ -62,8 +62,8 @@ project.name
         {% endfor %}
     {% endif %}
 </ul>
-{% endfor %}
 <div class="code"><pre><code>{{ function.code }}</code></pre></div>
+{% endfor %}
 <h2> Classes</h2>
 <ul>
     {% for class, c_functions in class_functions %}
