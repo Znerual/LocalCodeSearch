@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>{{ function.name }} - <a href="{{ url_for('code_file_details', id=code_file['_id']) }}">{{ code_file.file_name }}</a> </h1>
+{{ code_file.file_name }}
+{{ project.name }}
+<div class="summary">
+    {{ function.summary }}
+</div>
+<ul>
+    <li>Docstring: {{ function.docstring }}</li>
+    {% if function.imports %}
+        {% for import in function.imports %}
+        <ul>
+            <li>Imports: {{ import }}</li>
+        </ul>
+        {% endfor %}
+    {% endif %}
+    <li>Line Start: {{ function.line_start }}</li>
+    <li>Line End: {{ function.line_end }}</li>
+    {% if function.comments %}
+        {% for comment in function.comments %}
+        <ul>
+            <li>Comment: {{ comment }}</li>
+        </ul>
+        {% endfor %}
+    {% endif %}
+</ul>
+
+<div class="code"><pre><code>{{ function.code }}</code></pre></div>
+{% endblock %}

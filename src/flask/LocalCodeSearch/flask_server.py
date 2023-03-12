@@ -91,15 +91,26 @@ def search():
 
     
     #print(query)
-    results = mongo.db.code_functions.find(query)
-    return render_template('results.html', results=results)
+    functions = mongo.db.code_functions.find(query)
+    return render_template('results.html', functions=functions)
 
 @app.route('/help')
 def help():
     return render_template('index.html')
 
-@app.route('/result_details')
-def result_details():
+@app.route('/function_details')
+def function_details():
+    function_id = request.args.get('function_id')
+    print("In results details got function id = ", function_id)
+    function_entry = mongo.db.code_functions.find_one({'_id': ObjectId(function_id)})
+    print("The code_file_id for the found function is: {}".format(function_entry['code_file_id']))
+    code_file = mongo.db.code_files.find_one({'_id': ObjectId(function_entry['code_file_id'])})
+    print(f"Found code file {code_file['file_name']}")
+    project = mongo.db.projects.find_one({'_id': ObjectId(code_file['project_id'])})
+    return render_template('function_details.html', function=function_entry, code_file=code_file, project=project)
+
+@app.route('/code_file_details')
+def code_file_details():
     code_file_id = request.args.get('id')
     print("In results details got code file id = ", code_file_id)
     code_file_entry = mongo.db.code_files.find_one({'_id': ObjectId(code_file_id)})
@@ -108,7 +119,7 @@ def result_details():
     print(len(functions))
     classes = mongo.db.code_classes.find({'_id': {"$in" : code_file_entry["class_ids"]}})
     class_functions = tuple([(cl, [f for f in mongo.db.code_functions.find({'_id': {"$in" : cl["function_ids"]}})]) for cl in classes])
-    return render_template('result_details.html', code_file=code_file_entry, project=project, functions=functions, class_functions=class_functions)
+    return render_template('code_file_details.html', code_file=code_file_entry, project=project, functions=functions, class_functions=class_functions)
 
 
 # @app.route('/results')
